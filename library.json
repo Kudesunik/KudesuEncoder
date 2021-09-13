@@ -1,6 +1,6 @@
 {
   "name": "KudesuEncoder",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Simple encoder event-based library",
   "keywords": "encoder, event, signal, input, output, control",
   "repository":
@@ -8,7 +8,6 @@
     "type": "git",
     "url": "https://github.com/kudesunik/KudesuEncoder.git"
   },
-  "include": "Encoder.h",
   "authors":
   [
     {
