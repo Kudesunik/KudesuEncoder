@@ -42,12 +42,15 @@ Encoder::Encoder(int8_t encoderPin1, int8_t encoderPin2, int8_t buttonPin, void 
         }
         _isEncoderInterrupt = true;
     }
-    int buttonInterruptPin = digitalPinToInterrupt(buttonPin);
-    if(buttonInterruptPin != NOT_AN_INTERRUPT) {
-        attachInterrupt(buttonInterruptPin, buttonInterrupt, CHANGE);
-        _isButtonInterrupt = true;
+    _isEncoderInitialized = true;
+    if(buttonPin != (-1)) {
+        int buttonInterruptPin = digitalPinToInterrupt(buttonPin);
+        if(buttonInterruptPin != NOT_AN_INTERRUPT) {
+            attachInterrupt(buttonInterruptPin, buttonInterrupt, CHANGE);
+            _isButtonInterrupt = true;
+        }
+        _isButtonInitialized = true;
     }
-    _isInitialized = true;
 }
 
 Encoder::Encoder(int8_t encoderPin1, int8_t encoderPin2, void (*encoderFunction)(int))
@@ -71,7 +74,7 @@ void Encoder::updateButton() {
 }
 
 void Encoder::onEncoderInterrupt() {
-    if (_isInitialized) {
+    if (_isEncoderInitialized) {
         _encoderState = digitalRead(_encoderPin1);
         if (_encoderState != _encoderLastState) {
             if (_encoderState != digitalRead(_encoderPin2)) {
@@ -95,7 +98,7 @@ void Encoder::onEncoderInterrupt() {
 }
 
 void Encoder::onButtonInterrupt() {
-    if(_isInitialized) {
+    if(_isButtonInitialized) {
         if(_buttonState && (digitalRead(_buttonPin) == HIGH)) {
             _buttonState = false;
             buttonFunction(ENCODER_BUTTON_OFF);

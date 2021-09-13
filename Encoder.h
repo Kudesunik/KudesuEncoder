@@ -37,7 +37,8 @@ private:
     uint8_t _encoderLastState = 0;
     uint8_t _buttonState = 0;
     int8_t _counter = 0;
-    bool _isInitialized = false;
+    bool _isEncoderInitialized = false;
+    bool _isButtonInitialized = false;
 
     void updateEncoder();
     void updateButton();
