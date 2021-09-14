@@ -1,6 +1,6 @@
 {
   "name": "KudesuEncoder",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Simple encoder event-based library",
   "keywords": "encoder, event, signal, input, output, control",
   "repository":

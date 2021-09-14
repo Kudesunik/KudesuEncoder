@@ -24,13 +24,10 @@ Encoder::Encoder(int8_t encoderPin1, int8_t encoderPin2, int8_t buttonPin, void 
     _eventType = eventType;
     this->encoderFunction = encoderFunction;
     this->buttonFunction = buttonFunction;
-    pinMode(encoderPin1, INPUT);
-    pinMode(encoderPin2, INPUT);
-    digitalWrite(encoderPin1, HIGH);
-    digitalWrite(encoderPin2, HIGH);
+    pinMode(encoderPin1, INPUT_PULLUP);
+    pinMode(encoderPin2, INPUT_PULLUP);
     if(buttonPin != (-1)) {
-        pinMode(buttonPin, INPUT);
-        digitalWrite(buttonPin, HIGH);
+        pinMode(buttonPin, INPUT_PULLUP);
     }
     int encoderInterruptPin1 = digitalPinToInterrupt(encoderPin1);
     int encoderInterruptPin2 = digitalPinToInterrupt(encoderPin2);
