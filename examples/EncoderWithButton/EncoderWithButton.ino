@@ -1,5 +1,13 @@
 /**
- * Full encoder with button example
+ * Full encoder with button example;
+ *
+ * handleEncoder function receives encoder rotation events (ENCODER_CW and ENCODER_CCW values)
+ * handleEncoderButton function receives encoder button event (ENCODER_BUTTON_ON and ENCODER_BUTTON_OFF values)
+ *
+ * Encoder constructor in this example initialized with default event type value (ENCODER_EVENT_UPDATE)
+ * ENCODER_EVENT_UPDATE - all events called by encoder.update() from loop()
+ * ENCODER_EVENT_INTERRUPT - all events called by interrupt function directly (if interrupt pins used)
+ * Only use ENCODER_EVENT_INTERRUPT if sure what you are doing
  *
  * Author: Kudesunik
  * License: MIT
@@ -35,10 +43,10 @@ void handleEncoderButton(int result) {
 }
 
 void setup() {
-    Serial.begin(9600); //Output data to serial
+    Serial.begin(9600); //Output debug data
 }
 
 void loop() {
-    encoder.update(); //Update will be triggered if one of the encoder or button wire is not on the interrupt pin
+    encoder.update(); //Always place this in loop() function
     delay(100);
 }

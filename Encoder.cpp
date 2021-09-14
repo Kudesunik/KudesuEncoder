@@ -16,11 +16,12 @@ void ISR_ATTR buttonInterrupt() {
     self->onButtonInterrupt();
 }
 
-Encoder::Encoder(int8_t encoderPin1, int8_t encoderPin2, int8_t buttonPin, void (*encoderFunction)(int), void (*buttonFunction)(int)) {
+Encoder::Encoder(int8_t encoderPin1, int8_t encoderPin2, int8_t buttonPin, void (*encoderFunction)(int), void (*buttonFunction)(int), uint8_t eventType) {
     self = this;
     _encoderPin1 = encoderPin1;
     _encoderPin2 = encoderPin2;
     _buttonPin = buttonPin;
+    _eventType = eventType;
     this->encoderFunction = encoderFunction;
     this->buttonFunction = buttonFunction;
     pinMode(encoderPin1, INPUT);
@@ -53,24 +54,53 @@ Encoder::Encoder(int8_t encoderPin1, int8_t encoderPin2, int8_t buttonPin, void 
     }
 }
 
+Encoder::Encoder(int8_t encoderPin1, int8_t encoderPin2, int8_t buttonPin, void (*encoderFunction)(int), void (*buttonFunction)(int))
+        : Encoder(encoderPin1, encoderPin2, buttonPin, encoderFunction, buttonFunction, ENCODER_EVENT_UPDATE) {}
+
+Encoder::Encoder(int8_t encoderPin1, int8_t encoderPin2, void (*encoderFunction)(int), uint8_t eventType)
+        : Encoder(encoderPin1, encoderPin2, -1, encoderFunction, nullptr, eventType) {}
+
 Encoder::Encoder(int8_t encoderPin1, int8_t encoderPin2, void (*encoderFunction)(int))
         : Encoder(encoderPin1, encoderPin2, -1, encoderFunction, nullptr) {}
 
 void Encoder::update() {
     if(!_isEncoderInterrupt) {
-        updateEncoder();
+        onEncoderInterrupt();
     }
     if(!_isButtonInterrupt) {
-        updateButton();
+        onButtonInterrupt();
+    }
+    executeEvents();
+}
+
+void Encoder::handleAction(uint8_t action) {
+    if(_eventType == ENCODER_EVENT_UPDATE) {
+        _actions[_actionsWriteIndex] = action;
+        _actionsWriteIndex++;
+        if(_actionsWriteIndex == ENCODER_ACTIONS_SIZE) {
+            _actionsWriteIndex = 0;
+        }
+    } else if (_eventType == ENCODER_EVENT_INTERRUPT) {
+        executeAction(action);
     }
 }
 
-void Encoder::updateEncoder() {
-    onEncoderInterrupt();
+void Encoder::executeEvents() {
+    while(_actionsReadIndex != _actionsWriteIndex) {
+        executeAction(_actions[_actionsReadIndex]);
+        _actionsReadIndex++;
+        if(_actionsReadIndex == ENCODER_ACTIONS_SIZE) {
+            _actionsReadIndex = 0;
+        }
+    }
 }
 
-void Encoder::updateButton() {
-    onButtonInterrupt();
+void Encoder::executeAction(uint8_t action) {
+    if(action < 3) {
+        encoderFunction(action);
+    } else {
+        buttonFunction(action);
+    }
 }
 
 void Encoder::onEncoderInterrupt() {
@@ -84,16 +114,16 @@ void Encoder::onEncoderInterrupt() {
             }
             if (abs(_counter) == 2) {
                 if (_counter > 0) {
-                    encoderFunction(ENCODER_CW);
+                    handleAction(ENCODER_CW);
                 } else {
-                    encoderFunction(ENCODER_CCW);
+                    handleAction(ENCODER_CCW);
                 }
                 _counter = 0;
             }
         }
         _encoderLastState = _encoderState;
     } else {
-        encoderFunction(ENCODER_FAULT);
+        handleAction(ENCODER_FAULT);
     }
 }
 
@@ -101,10 +131,10 @@ void Encoder::onButtonInterrupt() {
     if(_isButtonInitialized) {
         if(_buttonState && (digitalRead(_buttonPin) == HIGH)) {
             _buttonState = false;
-            buttonFunction(ENCODER_BUTTON_OFF);
+            handleAction(ENCODER_BUTTON_OFF);
         } else if(!_buttonState && digitalRead(_buttonPin) == LOW) {
             _buttonState = true;
-            buttonFunction(ENCODER_BUTTON_ON);
+            handleAction(ENCODER_BUTTON_ON);
         }
     }
 }
